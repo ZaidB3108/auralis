@@ -8,6 +8,22 @@ A Windows desktop app combining audio-reactive edge lighting, synchronized lyric
 >
 > Hardware support is currently limited. A signed installer is not yet provided.
 
+## Screenshots
+
+### Listening Scene · Constellation
+
+![Constellation lyrics with a central active word, surrounding words, star connections, and an illuminated border](docs/listening-constellation.jpg)
+
+### Listening Scene · Classic lines
+
+![Classic three-line lyrics with the bottom panel hidden](docs/listening-classic.jpg)
+
+### Main interface
+
+![Auralis main interface showing player selection and the Find lyrics search above appearance controls](docs/settings.jpg)
+
+These are screenshots of the browser preview. The scenes use original sample text and a decorative demo border; native playback capture and keyboard sync run in the Windows app. Actual word highlighting requires enhanced LRC timestamps.
+
 ## Features
 
 | Feature | What it does |
@@ -18,8 +34,9 @@ A Windows desktop app combining audio-reactive edge lighting, synchronized lyric
 | Spotify lyrics | Synchronizes selected lyrics with Spotify desktop's Windows playback information. |
 | YouTube / browser lyrics | Reads media information exposed to Windows by the browser; availability depends on the page. |
 | Lyric lookup and import | Manually search LRCLIB or import local LRC files. Enhanced LRC enables real word timing. |
+| Untimed lyrics | Display plain-text results in the overlay and scene using Previous / Next line controls. |
 | Floating lyrics | Customizable transparent overlay with drag and click-through controls. |
-| Listening Scene | Full-screen Classic lines or Constellation lyrics, shared audio-reactive glow, palettes, and a hideable bottom panel. |
+| Listening Scene | Classic three-line lyrics or a spatial Constellation with a central active word, neighboring words, and star connections; shared glow, palettes, and a hideable panel. |
 | Saved preferences | Appearance settings stay on your device. Capture and keyboard sync start off. |
 
 ## Getting started on Windows
@@ -92,7 +109,7 @@ See [architecture notes](docs/ARCHITECTURE.md) and [contributing](CONTRIBUTING.m
 - Desktop glow covers the primary display, not the Windows lock screen or exclusive-fullscreen apps.
 - Restart listening after changing output devices. Toggle the border after changing display layout.
 - Lyric lookup is manual per track. Alternate recordings, intros, ads, and missing timelines affect synchronization.
-- Standard LRC is line-timed. Word highlighting requires enhanced LRC timestamps; timing is not inferred from audio.
+- Standard LRC is line-timed. Word highlighting requires enhanced LRC timestamps; timing is not inferred from audio. Untimed lyrics require manual Previous / Next line controls.
 - Keyboard support is confirmed only on ASUS TUF Gaming F16 FX608JMR. Armoury Crate may override colors. Normal stop restores the selected base color, not the previous Armoury Crate effect.
 
 ## Troubleshooting

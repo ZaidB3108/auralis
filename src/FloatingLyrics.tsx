@@ -31,6 +31,6 @@ export default function FloatingLyrics() {
       <p className="desktop-lyric-current">{view?.current || "Your music, in the moment"}</p>
       <p className="desktop-lyric-neighbor lyric-after">{view?.next || " "}</p>
     </div></div>
-    <p className="lyrics-overlay-help">{error || (!view ? "Choose a recording in Auralis to begin" : "Line-synced · Appearance controls in Auralis")}</p>
+    <p className="lyrics-overlay-help">{error || (!view ? "Choose a recording in Auralis to begin" : view.artist.endsWith(" · Manual lyrics") ? "Untimed lyrics · Use Previous / Next line in Auralis" : "Line-synced · Appearance controls in Auralis")}</p>
   </main>;
 }

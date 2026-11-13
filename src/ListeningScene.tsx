@@ -4,6 +4,7 @@ import { getCurrentWindow } from "@tauri-apps/api/window";
 import { isTauri } from "./tauri";
 import { useLyricAppearance } from "./lyricAppearance";
 import DesktopBorder from "./DesktopBorder";
+import ConstellationLyrics from "./ConstellationLyrics";
 import "./scene.css";
 
 type View = { title: string; artist: string; previous: string; current: string; next: string; words: string[]; activeWord: number; lineId: number; playing: boolean };
@@ -13,8 +14,6 @@ function loadOptions(): Options {
   try { const s = JSON.parse(localStorage.getItem("auralis-scene-v1") || "null"); return { style: s?.style === "classic" ? "classic" : "constellation", background: s?.background === "night" ? "night" : "haze", symbols: s?.symbols !== false, panelHidden: s?.panelHidden === true }; }
   catch { return { style: "constellation", background: "haze", symbols: true, panelHidden: false }; }
 }
-const symbols: Record<string, string> = { love: "♡", heart: "♡", night: "☾", moon: "☾", stars: "✧", star: "✧", light: "✦", dream: "✧", dreams: "✧", time: "◷", world: "◎", rain: "☂", sun: "☀", fire: "♨", music: "♫", home: "⌂" };
-function icon(word: string) { return symbols[word.toLowerCase().replace(/[^a-z]/g, "")] || ""; }
 
 export default function ListeningScene() {
   const [view, setView] = useState<View>(fallback);
@@ -62,12 +61,7 @@ export default function ListeningScene() {
     catch (e) { setError(String(e)); }
     finally { setBusy(false); }
   }
-  const words = view.words?.length ? view.words : view.current.split(/\s+/).filter(Boolean);
   const timed = !!view.words?.length;
-  const active = timed ? view.activeWord : -1;
-  // Bound the visible cluster for unusually long lines without inventing timestamps.
-  const first = timed ? Math.max(0, active - 4) : 0;
-  const visible = words.slice(first, first + 11);
   const style = { "--scene-ink": a.primary, "--scene-muted": a.secondary, "--scene-color": a.glow, "--scene-size": `${a.size * 1.5}px` } as CSSProperties;
   return <main className={`listening-scene scene-${options.background} ${idle ? "scene-idle" : ""}`} style={style}>
     <div className="scene-atmosphere" aria-hidden="true" />
@@ -75,16 +69,7 @@ export default function ListeningScene() {
     <header className="scene-header"><span className="scene-brand">AURALIS <span>LISTENING SCENE</span></span><div className="scene-header-actions"><button aria-expanded={!options.panelHidden} aria-controls="scene-controls" onClick={() => patch({ panelHidden: !options.panelHidden })}>{options.panelHidden ? "Show panel" : "Hide panel"}</button><button onClick={() => void close()}>Exit scene <kbd>Esc</kbd></button></div></header>
     <div className="scene-song"><span className="scene-song-dot" /><div><h1>{view.title}</h1><p>{view.artist}</p></div><span className="scene-play-state">{view.playing ? "NOW PLAYING" : "PAUSED / WAITING"}</span></div>
     {options.style === "classic" ? <section className="scene-classic" aria-label="Classic lyrics"><div key={`${view.title}:${view.lineId}`} className="scene-line-arrival"><p className="scene-line-neighbor">{view.previous || " "}</p><p className="scene-line-current">{view.current}</p><p className="scene-line-neighbor">{view.next || " "}</p></div></section>
-      : <section className="scene-constellation" aria-label="Constellation lyrics">
-        <p className="constellation-context">{view.previous || " "}</p>
-        <div className="constellation-words scene-line-arrival" key={`${view.title}:${view.lineId}`}>
-          {visible.map((word, i) => <span key={`${first+i}`} className={`constellation-word ${timed ? (first+i === active ? "word-current" : first+i < active ? "word-past" : "word-future") : "word-line"}`}>
-            {options.symbols && icon(word) && <span className="word-symbol" aria-hidden="true">{icon(word)}</span>}<span>{word}</span><i aria-hidden="true" />
-          </span>)}
-        </div>
-        {!timed && words.length > visible.length && <p className="constellation-overflow">{words.slice(visible.length).join(" ")}</p>}
-        <p className="constellation-context">{view.next || " "}</p>
-      </section>}
+      : <ConstellationLyrics {...view} symbols={options.symbols} />}
     <footer id="scene-controls" className="scene-controls" hidden={options.panelHidden}>
       <div className="scene-style-switch" role="group" aria-label="Lyric style"><button aria-pressed={options.style === "classic"} onClick={() => patch({ style: "classic" })}>Classic lines</button><button aria-pressed={options.style === "constellation"} onClick={() => patch({ style: "constellation" })}>Constellation</button></div>
       <label>Backdrop<select value={options.background} onChange={e => patch({ background: e.target.value as Options["background"] })}><option value="night">Midnight</option><option value="haze">Soft haze</option></select></label>

@@ -19,6 +19,7 @@ export default function LyricsPanel({ fontSize }: { fontSize: number }) {
   const [results, setResults] = useState<Result[]>([]);
   const [lines, setLines] = useState<LyricLine[]>([]);
   const [plain, setPlain] = useState("");
+  const [manualIndex, setManualIndex] = useState(0);
   const [selected, setSelected] = useState("");
   const [notice, setNotice] = useState("");
   const [error, setError] = useState("");
@@ -77,21 +78,26 @@ export default function LyricsPanel({ fontSize }: { fontSize: number }) {
     finally { clearTimeout(timeout); if (request.current === controller) setBusy(false); }
   }
   function choose(result: Result) {
+    setManualIndex(0);
     const parsed = typeof result.syncedLyrics === "string" ? parseLrc(result.syncedLyrics) : [];
     setLines(parsed); setPlain(typeof result.plainLyrics === "string" ? result.plainLyrics : "");
     setSelected(`${result.trackName} · ${result.artistName}`); setResults([]);
     setNotice(result.instrumental ? "This recording is marked instrumental." : parsed.length ? "Lyrics follow the selected player. Use timing adjustment if needed." : "Only untimed lyrics are available for this recording.");
   }
   const index = activeLine(lines, time + offset);
-  const previous = lines[index - 1]?.text ?? "";
-  const current = index < 0 ? "♪" : lines[index]?.text || "♪";
-  const next = lines[index + 1]?.text ?? "";
+  const plainLines = plain.split(/\r?\n/).map(line => line.trim()).filter(Boolean);
+  const manual = lines.length === 0 && plainLines.length > 0;
+  const manualPosition = Math.min(manualIndex, Math.max(0, plainLines.length - 1));
+  const previous = manual ? plainLines[manualPosition - 1] ?? "" : lines[index - 1]?.text ?? "";
+  const current = manual ? plainLines[manualPosition] : index < 0 ? "♪" : lines[index]?.text || "♪";
+  const next = manual ? plainLines[manualPosition + 1] ?? "" : lines[index + 1]?.text ?? "";
+  const hasLyrics = lines.length > 0 || manual;
   const timedWords = lines[index]?.words;
   const activeWord = timedWords ? activeLine(timedWords, time + offset) : -1;
   useEffect(() => {
     if (!isTauri) return;
-    void invoke("update_lyrics_view", { view: { title: song?.title ?? "No active track", artist: song?.artist ?? "", previous: lines.length && song ? previous : "", current: lines.length && song ? current : "Find lyrics in Auralis", next: lines.length && song ? next : "", fontSize, lineId: index, words: song ? timedWords?.map(w => w.text) ?? [] : [], activeWord: song ? activeWord : -1, playing: song?.playing ?? false } }).catch(() => {});
-  }, [song?.title, song?.artist, song?.playing, !!song, previous, current, next, lines.length, fontSize, index, timedWords, activeWord]);
+    void invoke("update_lyrics_view", { view: { title: song?.title ?? "No active track", artist: manual ? `${song?.artist ?? ""} · Manual lyrics` : song?.artist ?? "", previous: hasLyrics && song ? previous : "", current: hasLyrics && song ? current : selected ? "No displayable lyrics for this recording" : "Find lyrics in Auralis", next: hasLyrics && song ? next : "", fontSize, lineId: manual ? manualPosition : index, words: song ? timedWords?.map(w => w.text) ?? [] : [], activeWord: song ? activeWord : -1, playing: song?.playing ?? false } }).catch(e => setNotice(`Could not update lyric display: ${String(e)}`));
+  }, [song?.title, song?.artist, song?.playing, !!song, previous, current, next, hasLyrics, manual, manualPosition, selected, fontSize, index, timedWords, activeWord]);
   return <section className="settings lyrics-panel" aria-label="Synchronized lyrics">
     <div className="section-title"><div><p className="eyebrow">{player === "browser" ? "YOUTUBE / BROWSER LYRICS" : "SPOTIFY LYRICS"}</p><h2>{song?.title || "Your music, line by line"}</h2><p>{song?.artist || (player === "browser" ? "Play a YouTube music video in your browser to begin." : "Play a song in Spotify desktop to begin.")}</p></div><button disabled={!isTauri} onClick={() => { void invoke("open_lyrics_window").catch(e => setNotice(String(e))); }}>Desktop lyrics</button></div>
     <label>Lyrics player<select value={player} onChange={e => { setPlayer(e.target.value as "spotify" | "browser"); setSource(""); }}><option value="spotify">Spotify desktop</option><option value="browser">YouTube / browser</option></select></label>
@@ -100,18 +106,23 @@ export default function LyricsPanel({ fontSize }: { fontSize: number }) {
       <p>Uses the media session your browser shares with Windows; it cannot identify the website or choose a tab directly. Play YouTube and pause other browser media. If multiple browsers are active, select the right session above.</p>
       <p>YouTube may report the channel name instead of the artist. Edit the search text before Find lyrics. Ads, intros, live streams, or alternate versions can disrupt timing; use the adjustment for small offsets.</p>
     </>}
+    <label>Find a recording<input type="search" value={query} onChange={e => setQuery(e.target.value)} placeholder="Song title and artist" maxLength={200} /></label>
+    <button disabled={!song || busy || !query.trim()} onClick={() => void search()}>{busy ? "Finding lyrics…" : "Find lyrics"}</button>
+    <p>Find lyrics sends this search text to LRCLIB. Audio is never sent. Choose the correct version; live recordings and remixes can have different timings.</p>
+    <div className="lyric-results">{results.map(r => <button key={r.id} onClick={() => choose(r)}>{r.trackName} — {r.artistName} · {Math.round(r.duration)}s · {r.syncedLyrics ? "Timed" : r.instrumental ? "Instrumental" : "Untimed"}</button>)}</div>
     <LyricAppearanceControls />
     <div className="scene-launch"><div><h3>Listening Scene</h3><p>A full-screen music space with Classic lines or reel-inspired Constellation lyrics. Both share the background and edge lighting.</p></div><button disabled={!isTauri} onClick={() => { void invoke("open_listening_scene").catch(e => setNotice(String(e))); }}>Enter Listening Scene</button></div>
     <p>Constellation uses actual word timestamps when an enhanced LRC file supplies them. Standard lyrics remain line-timed; no word timings are guessed.</p>
     <p>{song ? `${song.playing ? "Playing" : "Paused"} · ${Math.floor(time)} / ${Math.floor(song.duration)} seconds` : `Waiting for ${player === "browser" ? "your browser’s" : "Spotify’s"} Windows media session.`}</p>
     {song && song.duration <= 0 && <p role="status">This player has not provided a usable playback timeline. Try a regular song or video; timed highlighting cannot sync yet.</p>}
     {lines.length > 0 && song && <div className="lyric-stage" style={{ fontSize }}><p className="lyric-neighbor">{previous || " "}</p><p className="lyric-current">{current}</p><p className="lyric-neighbor">{next || " "}</p></div>}
-    {!lines.length && plain && <div className="plain-lyrics">{plain}</div>}
+    {manual && <div className="manual-lyrics">
+      <p role="status">This recording has no timestamps. Use these controls to advance the desktop and Listening Scene lyrics, or choose a result marked Timed for automatic sync.</p>
+      <div className="lyric-stage" style={{ fontSize }}><p className="lyric-current">{current}</p></div>
+      <div role="group" aria-label="Manual lyric navigation"><button disabled={manualPosition === 0} onClick={() => setManualIndex(manualPosition - 1)}>Previous line</button><span>Line {manualPosition + 1} of {plainLines.length}</span><button disabled={manualPosition >= plainLines.length - 1} onClick={() => setManualIndex(manualPosition + 1)}>Next line</button></div>
+      <details><summary>Read all lyrics</summary><div className="plain-lyrics">{plain}</div></details>
+    </div>}
     {selected && <p>Selected: {selected} · Lyrics from LRCLIB or your imported file.</p>}
-    <label>Find a recording<input type="search" value={query} onChange={e => setQuery(e.target.value)} placeholder="Song title and artist" maxLength={200} /></label>
-    <button disabled={!song || busy || !query.trim()} onClick={() => void search()}>{busy ? "Finding lyrics…" : "Find lyrics"}</button>
-    <p>Find lyrics sends this search text to LRCLIB. Audio is never sent. Choose the correct version; live recordings and remixes can have different timings.</p>
-    <div className="lyric-results">{results.map(r => <button key={r.id} onClick={() => choose(r)}>{r.trackName} — {r.artistName} · {Math.round(r.duration)}s · {r.syncedLyrics ? "Timed" : r.instrumental ? "Instrumental" : "Untimed"}</button>)}</div>
     <label>Timing adjustment: {offset > 0 ? "+" : ""}{offset.toFixed(1)}s<input type="range" min="-10" max="10" step="0.1" value={offset} onChange={e => setOffset(Number(e.target.value))} /></label>
     <p>Positive values show lyrics earlier. Track changes clear the previous lyrics and adjustment.</p>
     <label>Or import timed lyrics (.lrc)<input type="file" accept=".lrc,text/plain" disabled={!song} onChange={async e => {
