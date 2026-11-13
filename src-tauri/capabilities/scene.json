@@ -1,0 +1,7 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "listening-scene-controls",
+  "description": "Allow the listening scene to close using Exit or Escape.",
+  "windows": ["listening-scene"],
+  "permissions": ["core:window:allow-close"]
+}

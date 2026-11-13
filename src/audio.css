@@ -1,0 +1,19 @@
+.audio-panel button:disabled { opacity: .55; cursor: default; }
+.audio-panel meter { width: 100%; height: 24px; accent-color: #8797ff; }
+.audio-preview { min-height: 130px; border-radius: 16px; padding: 24px; display: flex; align-items: center; justify-content: space-between; transition: background-color 180ms ease-out; }
+.audio-preview strong { font-size: 1.5rem; }
+.audio-panel [role="alert"] { color: #ffb5b5; }
+@media (prefers-reduced-motion: reduce) { .audio-preview { transition: none; } }
+.lighting-settings { display: grid; gap: 20px; }
+.keyboard-sync { display: grid; gap: 14px; padding: 20px; border: 1px solid #8797ff55; border-radius: 16px; }
+.keyboard-sync h3 { margin: 0; }
+.audio-preview { position: relative; overflow: hidden; min-height: 230px; background: #080c18; border: 1px solid #ffffff18; }
+.light-wash { position: absolute; inset: -30%; mask-image: radial-gradient(ellipse at center, black, transparent 78%); transition-property: opacity, background-color; transition-timing-function: ease-out; pointer-events: none; }
+.preview-caption { position: relative; z-index: 1; display: grid; gap: 8px; padding: 14px; border-radius: 12px; background: #090d1cce; }
+.light-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(150px,1fr)); gap: 20px; }
+.light-grid input[type="color"] { width: 100%; height: 44px; border: 1px solid #ffffff40; border-radius: 8px; background: transparent; cursor: pointer; }
+.light-presets { display: flex; gap: 10px; flex-wrap: wrap; }
+.light-presets button { background: #263455; border: 1px solid #8797ff66; }
+.light-presets button[aria-pressed="true"] { background: #596bc0; }
+button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid #b5c3ff; outline-offset: 4px; }
+@media (prefers-reduced-motion: reduce) { .light-wash { transition-duration: 0ms !important; } }

@@ -1,0 +1,9 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Auralis",
+  "version": "0.1.0",
+  "identifier": "com.auralis.app",
+  "build": { "beforeDevCommand": "npm run dev", "devUrl": "http://localhost:1420", "beforeBuildCommand": "npm run build", "frontendDist": "../dist" },
+  "app": { "windows": [{ "title": "Auralis", "width": 1000, "height": 760, "minWidth": 640, "minHeight": 540, "resizable": true }] },
+  "bundle": { "active": true, "targets": "all" }
+}

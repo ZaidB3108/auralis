@@ -1,0 +1,26 @@
+node_modules/
+dist/
+target/
+src-tauri/gen/
+*.tsbuildinfo
+work/
+outputs/
+.agents/
+.codex/
+.aws/
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.pfx
+*.p12
+.npmrc
+# npm is the supported package manager
+pnpm-lock.yaml
+pnpm-workspace.yaml
+*.log
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

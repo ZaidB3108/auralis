@@ -1,0 +1,7 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "lyrics-overlay-controls",
+  "description": "Allow the lyrics overlay to be dragged and closed by its controls.",
+  "windows": ["floating-lyrics"],
+  "permissions": ["core:window:allow-start-dragging", "core:window:allow-close"]
+}
