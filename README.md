@@ -8,6 +8,22 @@ A Windows desktop app combining audio-reactive edge lighting, synchronized lyric
 >
 > Hardware support is currently limited. A signed installer is not yet provided.
 
+## Screenshots
+
+### Listening Scene · Constellation
+
+![Constellation lyrics with an illuminated border and individually emphasized words](docs/listening-constellation.jpg)
+
+### Listening Scene · Classic lines
+
+![Classic three-line lyrics with the bottom panel hidden](docs/listening-classic.jpg)
+
+### Main interface
+
+![Auralis main interface showing player selection and lyric appearance controls](docs/settings.jpg)
+
+These are screenshots of the browser preview. The scenes use original sample text and a decorative demo border; native playback capture and keyboard sync run in the Windows app. Actual word highlighting requires enhanced LRC timestamps.
+
 ## Features
 
 | Feature | What it does |
@@ -122,3 +138,4 @@ Built with [Tauri](https://tauri.app/), [React](https://react.dev/), [Rust](http
 Visual inspiration includes Lumn and Verci. Auralis is independent and is not affiliated with them, Spotify, YouTube, or ASUS. No commercial lyric collection or reference-product assets are bundled.
 
 An open-source license has not yet been selected. Third-party dependencies and imported lyrics remain subject to their own licenses and rights.
+
